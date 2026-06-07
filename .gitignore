@@ -1,0 +1,6 @@
+.env
+venv/
+__pycache__/
+*.pyc
+outputs/
+placeholder_sample_run.png
