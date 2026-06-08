@@ -104,13 +104,13 @@ In Swagger, click `Authorize` and enter only the token value. Swagger adds `Bear
 ### API Screenshots
 
 #### Swagger Docs
-![Swagger Docs](images/api_ss_2.png)
+![Swagger Docs](images/api_ss_4.png)
 
 #### Unauthorized Request
-![Unauthorized 401 Request](images/api_ss_1.png)
+![Unauthorized 401 Request](images/api_ss_3.png)
 
 #### Successful Generate Request
-![Successful POST Generate Request](images/api_ss_3.png)
+![Successful POST Generate Request](images/api_ss_2.png)
 
 #### Updated Output File
-![Updated Output File](images/api_ss_4.png)
+![Updated Output File](images/api_ss_1.png)
