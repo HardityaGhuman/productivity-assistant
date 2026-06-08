@@ -114,3 +114,9 @@ In Swagger, click `Authorize` and enter only the token value. Swagger adds `Bear
 
 #### Updated Output File
 ![Updated Output File](images/api_ss_1.png)
+
+### What Changed From CLI To API
+
+The original app took task input from the terminal using `input()`. It now accepts task input through a FastAPI `POST /generate` endpoint using a JSON request body.
+
+The Groq response generation logic remains the same, but the output is now returned as a JSON API response and saved to `outputs/response.txt`. Protected routes use static Bearer token authentication from `.env`.
