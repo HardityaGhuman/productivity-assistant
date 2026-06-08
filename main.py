@@ -1,6 +1,7 @@
 import os
 from datetime import datetime
 from dotenv import load_dotenv
+# pyrefly: ignore [missing-import]
 from groq import Groq
 
 load_dotenv()
@@ -15,11 +16,9 @@ if not GROQ_API_KEY:
 
 client = Groq(api_key=GROQ_API_KEY)
 
-
 def get_user_input():
     task = input("Enter your productivity task: ")
     return task
-
 
 def generate_response(task):
     prompt = f"""
@@ -56,7 +55,6 @@ Keep the response practical and beginner-friendly.
 
     return chat_completion.choices[0].message.content
 
-
 def save_response(task, response):
     os.makedirs("outputs", exist_ok=True)
 
@@ -73,7 +71,6 @@ def save_response(task, response):
 
     print(f"\nResponse saved to {file_path}")
 
-
 def main():
     print("AI Productivity Assistant using Groq")
     print("-" * 40)
@@ -86,6 +83,6 @@ def main():
 
     save_response(task, response)
 
-
 if __name__ == "__main__":
     main()
+

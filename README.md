@@ -42,7 +42,7 @@ python3 main.py
 > "Explain Git and GitHub in simple terms"
 
 ### Output Screenshot
-![Sample Run Screenshot](placeholder_sample_run.png)
+![Sample Run Screenshot](images/placeholder_sample_run.png)
 
 ---
 
@@ -50,3 +50,59 @@ python3 main.py
 - Managing API keys securely using `.env` files and `.gitignore`.
 - Structuring LLM prompts to return consistent, formatted responses.
 - Handling file I/O operations (appending text, creating directories) in Python.
+
+---
+
+## FastAPI Backend
+
+This project was upgraded from a terminal based CLI app into a FastAPI backend API. The existing Groq response generation logic is reused, but task input now comes from an HTTP request body instead of `input()`.
+
+### Environment Variables
+Create a `.env` file using `.env.example` as a reference:
+
+```env
+GROQ_API_KEY=your_actual_groq_api_key
+MODEL_NAME=llama-3.3-70b-versatile
+API_SECRET_TOKEN=your_api_secret_token
+```
+
+### Run API Server
+```bash
+source venv/bin/activate
+python -m uvicorn api:app --reload
+```
+
+Swagger docs:
+
+```text
+http://127.0.0.1:8000/docs
+```
+
+### Endpoints
+| Method | Endpoint | Purpose | Auth Required |
+|---|---|---|---|
+| GET | `/` | API health check | No |
+| POST | `/generate` | Generate an AI productivity response | Yes |
+| GET | `/outputs` | View saved responses | Yes |
+
+### Bearer Token Authentication
+Protected endpoints require this header:
+
+```http
+Authorization: Bearer your_api_secret_token
+```
+
+In Swagger, click `Authorize` and enter only the token value. Swagger adds `Bearer` automatically.
+
+### Sample Request Body
+```json
+{
+  "task": "Help me learn FastAPI as a beginner"
+}
+```
+
+### API Screenshots
+- Swagger docs: `images/api_ss_2.png`
+- Unauthorized `401` request: `images/api_ss_1.png`
+- Successful `POST /generate`: `images/api_ss_3.png`
+- Updated `outputs/response.txt`: `images/api_ss_4.png`
