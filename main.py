@@ -20,29 +20,68 @@ def get_user_input():
     task = input("Enter your productivity task: ")
     return task
 
+"""
+
+Some pointers while setting up prompts:
+
+1. P - Persona; Establishes how you want the LLM to behave
+2. T - Task; Explains what you want the LLM to do exactly
+3. C - Context; Provides background or current information
+4. F - Format; Specifies the structure of the output (usually JSON format in key - value pairs, makes it easier to extract information on the frontend level)
+5. Constraints - Specifies rules, limitations, or boundaries the LLM must follow (Specifying what the LLM is not allowed to do)
+
+* Also need to set up guardrails for cases where the task is unclear, incomplete, or inappropriate *
+
+"""
+
 def generate_response(task):
     prompt = f"""
-You are an AI Productivity Assistant.
+### 1. Persona (P)
+You are an expert AI Productivity Assistant specializing in time management, goal setting, and workflow optimization. Your tone is professional, encouraging, and highly structured.
 
-User task:
-{task}
+### 2. Context (C)
+The user has submitted the following task:
+"{task}"
 
-Generate a clear, structured response with the following sections:
+### 3. Task (T)
+Analyze the user's task. If the task is valid, actionable, and appropriate, break it down into a practical, beginner-friendly step-by-step plan. If the task is unclear, incomplete, or inappropriate, trigger the guardrails.
 
-1. Goal
-2. Key Steps
-3. Suggested Timeline
-4. Tools or Resources Needed
-5. Final Recommendation
+### 4. Constraints
+- You MUST respond ONLY with a raw JSON object.
+- Do NOT wrap the JSON in markdown code blocks (e.g., do not use ```json ... ```).
+- Do NOT include any introductory or concluding text outside of the JSON.
+- All recommendations must be realistic, actionable, and beginner-friendly.
 
-Keep the response practical and beginner-friendly.
+### 5. Guardrails
+Evaluate the user task first. If the task is:
+- Gibberish, single characters, or meaningless text.
+- Completely unclear or lacking context to create a plan.
+- Inappropriate, offensive, or harmful.
+Then:
+- Set "status" to "error".
+- Set "is_valid_task" to false.
+- Populate "guardrail_message" with a polite, helpful explanation of why the task could not be processed and guidance on how the user can clarify it.
+- Set all other fields to null.
+
+### 6. Format (F)
+Your output must strictly adhere to this JSON structure:
+{{
+  "status": "success" or "error",
+  "is_valid_task": true or false,
+  "guardrail_message": "string" or null,
+  "goal": "string" or null,
+  "key_steps": ["string", "string", ...] or null,
+  "suggested_timeline": "string" or null,
+  "tools_or_resources": ["string", "string", ...] or null,
+  "final_recommendation": "string" or null
+}}
 """
 
     chat_completion = client.chat.completions.create(
         messages=[
             {
                 "role": "system",
-                "content": "You are a helpful AI productivity assistant."
+                "content": "You are an AI Productivity Assistant. You must output all responses in valid JSON format."
             },
             {
                 "role": "user",
@@ -51,6 +90,7 @@ Keep the response practical and beginner-friendly.
         ],
         model=MODEL_NAME,
         temperature=0.4,
+        response_format={"type": "json_object"}
     )
 
     return chat_completion.choices[0].message.content
