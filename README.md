@@ -1,14 +1,15 @@
 # AI Productivity Assistant
 
-A minimal CLI tool that queries the Groq API to generate structured productivity guides and study plans, saving the outputs to a local file.
+A model-agnostic CLI + API tool that uses LLM providers to generate structured productivity guides and study plans, saving the outputs to a local file. Powered by [LiteLLM](https://docs.litellm.ai/docs/providers), it supports **100+ LLM providers** — just change the model name in your `.env` file to switch between them.
 
 ---
 
 ## Features & Tech Stack
 - **CLI Interface:** Standard user input prompt.
+- **Model Agnostic:** Switch between any LLM provider (Groq, OpenAI, Gemini, Anthropic, Azure, Ollama, and 100+ more) by changing a single environment variable.
 - **Structured Output:** Automatically generates plans containing a Goal, Key Steps, Timeline, Tools, and Recommendations.
 - **History Logging:** Saves runs to `outputs/response.txt` with execution timestamps.
-- **Tech Stack:** Python 3, `groq` API SDK, `python-dotenv`.
+- **Tech Stack:** Python 3, LiteLLM, FastAPI, `python-dotenv`.
 
 ---
 
@@ -25,11 +26,18 @@ pip install -r requirements.txt
 ### 2. Environment Configuration
 Create a `.env` file in the root directory (use `.env.example` as a template):
 ```env
-GROQ_API_KEY=your_actual_api_key_here
-MODEL_NAME=llama-3.3-70b-versatile
+# Set the API key for the provider you want to use
+GROQ_API_KEY=your_api_key_here
+
+# Format: provider/model_id
+MODEL_NAME=groq/llama-3.3-70b-versatile
+
+API_SECRET_TOKEN=your_api_secret_token
 ```
 
-### 3. Run
+**Supported providers include:** Groq, OpenAI, Gemini, Anthropic, Azure, Ollama, Hugging Face, and many more. See [LiteLLM Provider Docs](https://docs.litellm.ai/docs/providers) for the full list.
+
+### 3. Run CLI
 ```bash
 python3 main.py
 ```
@@ -49,20 +57,21 @@ python3 main.py
 ## Learning Outcomes
 - Managing API keys securely using `.env` files and `.gitignore`.
 - Structuring LLM prompts to return consistent, formatted responses.
+- Building model-agnostic applications using LiteLLM.
 - Handling file I/O operations (appending text, creating directories) in Python.
 
 ---
 
 ## FastAPI Backend
 
-This project was upgraded from a terminal based CLI app into a FastAPI backend API. The existing Groq response generation logic is reused, but task input now comes from an HTTP request body instead of `input()`.
+This project includes a FastAPI backend API. The LLM response generation logic is shared with the CLI, but task input comes from an HTTP request body instead of `input()`.
 
 ### Environment Variables
 Create a `.env` file using `.env.example` as a reference:
 
 ```env
-GROQ_API_KEY=your_actual_groq_api_key
-MODEL_NAME=llama-3.3-70b-versatile
+GROQ_API_KEY=your_api_key_here
+MODEL_NAME=groq/llama-3.3-70b-versatile
 API_SECRET_TOKEN=your_api_secret_token
 ```
 
@@ -119,4 +128,4 @@ In Swagger, click `Authorize` and enter only the token value. Swagger adds `Bear
 
 The original app took task input from the terminal using `input()`. It now accepts task input through a FastAPI `POST /generate` endpoint using a JSON request body.
 
-The Groq response generation logic remains the same, but the output is now returned as a JSON API response and saved to `outputs/response.txt`. Protected routes use static Bearer token authentication from `.env`.
+The LLM response generation logic remains the same, but the output is now returned as a JSON API response and saved to `outputs/response.txt`. Protected routes use static Bearer token authentication from `.env`.

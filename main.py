@@ -2,19 +2,17 @@ import os
 from datetime import datetime
 from dotenv import load_dotenv
 # pyrefly: ignore [missing-import]
-from groq import Groq
+import litellm
 
 load_dotenv()
 
-GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-MODEL_NAME = os.getenv("MODEL_NAME", "llama-3.3-70b-versatile")
+MODEL_NAME = os.getenv("MODEL_NAME")
 
-if not GROQ_API_KEY:
-    raise ValueError("GROQ_API_KEY is missing. Please add it to your .env file.")
-
-# Above block is made for better error handling and visibility
-
-client = Groq(api_key=GROQ_API_KEY)
+if not MODEL_NAME:
+    raise ValueError(
+        "MODEL_NAME is missing. Please set it in your .env file.\n"
+        "Format: provider/model_id (e.g. groq/llama-3.3-70b-versatile, openai/gpt-4o, gemini/gemini-2.0-flash)"
+    )
 
 def get_user_input():
     task = input("Enter your productivity task: ")
@@ -33,6 +31,9 @@ Some pointers while setting up prompts:
 * Also need to set up guardrails for cases where the task is unclear, incomplete, or inappropriate *
 
 """
+
+# Change code to be model agnostic; Shouldnt matter what model is being used
+# Just need to change model name in the env file
 
 def generate_response(task):
     prompt = f"""
@@ -77,23 +78,27 @@ Your output must strictly adhere to this JSON structure:
 }}
 """
 
-    chat_completion = client.chat.completions.create(
-        messages=[
-            {
-                "role": "system",
-                "content": "You are an AI Productivity Assistant. You must output all responses in valid JSON format."
-            },
-            {
-                "role": "user",
-                "content": prompt
-            }
-        ],
-        model=MODEL_NAME,
-        temperature=0.4,
-        response_format={"type": "json_object"}
-    )
+    messages = [
+        {"role": "system", "content": "You are an AI Productivity Assistant. You must output all responses in valid JSON format."},
+        {"role": "user", "content": prompt}
+    ]
 
-    return chat_completion.choices[0].message.content
+    try:
+        response = litellm.completion(
+            model=MODEL_NAME,
+            messages=messages,
+            temperature=0.4,
+            response_format={"type": "json_object"}
+        )
+    except Exception:
+        # Fallback: some models/providers don't support response_format
+        response = litellm.completion(
+            model=MODEL_NAME,
+            messages=messages,
+            temperature=0.4
+        )
+
+    return response.choices[0].message.content
 
 def save_response(task, response):
     os.makedirs("outputs", exist_ok=True)
@@ -102,6 +107,7 @@ def save_response(task, response):
 
     with open(file_path, "a", encoding="utf-8") as file:
         file.write(f"Date: {datetime.now()}\n")
+        file.write(f"Model: {MODEL_NAME}\n")
         file.write(f"Task: {task}\n")
         file.write("AI Response:\n")
         file.write(response)
@@ -112,7 +118,7 @@ def save_response(task, response):
     print(f"\nResponse saved to {file_path}")
 
 def main():
-    print("AI Productivity Assistant using Groq")
+    print(f"AI Productivity Assistant ({MODEL_NAME})")
     print("-" * 40)
 
     task = get_user_input()

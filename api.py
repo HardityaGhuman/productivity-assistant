@@ -2,7 +2,7 @@ import os
 # pyrefly: ignore [missing-import]
 from fastapi import Depends, FastAPI, HTTPException
 from pydantic import BaseModel
-from main import generate_response, save_response
+from main import generate_response, save_response, MODEL_NAME
 from auth import verify_bearer_token
 
 app = FastAPI(title = "Productivity Assistant API") # This creates FastAPI app
@@ -36,7 +36,7 @@ This route:
 Checks the token.
 Reads the task from JSON.
 Rejects empty tasks with 400.
-Calls your existing Groq function.
+Calls your existing LLM function.
 Saves the response.
 Returns the AI response as JSON.
 """
@@ -60,6 +60,7 @@ def generate_task_response(
 
         return {
             "task": task,
+            "model_used": MODEL_NAME,
             "response": response
         }
 
